@@ -1,0 +1,105 @@
+import os
+import tkinter.messagebox
+from tkinter import *
+from tkinter import filedialog
+
+from pygame import mixer
+
+root = Tk()
+menubar =Menu(root)
+root.config(menu=menubar)
+subMenu =Menu(menubar,tearoff=0)
+
+playlist = []
+def browse_file():
+    global filename_path
+    filename_path=filedialog.askopenfilename()
+    add_to_playlist(filename_path)
+    print(filename_path)
+menubar.add_cascade(label="file",menu=subMenu)
+subMenu.add_command(label="open",command=browse_file)
+subMenu.add_command(label="exit",command=root.destroy)
+subMenu =Menu(menubar,tearoff=0)
+def add_to_playlist(filename):
+    filename = os.path.basename(filename)
+    index = 0
+    playlistbox.insert(index, filename)
+    playlist.insert(index,filename_path)
+    index += 1
+
+def about_us():
+    tkinter.messagebox.showinfo('our life','made by rahul rishabh yogesh mohit' )
+menubar.add_cascade(label="help",menu=subMenu)
+subMenu.add_command(label="About us",command=about_us)
+mixer.init()
+root.title("drony music")
+
+root.iconbitmap(r'C:\file\untitled1\venv\play.ico')
+text = Label(root,text='lets play the music')
+text.pack()
+leftframe =Frame(root)
+leftframe.pack()
+playlistbox =Listbox(leftframe)
+playlistbox.pack()
+
+btn1=Button(root,text="+ Add",command=browse_file)
+btn1.pack()
+
+def rewind_music():
+    play_music()
+    statusbar['text']="music rewind"
+
+
+
+def play_music():
+    try:
+        paused
+    except NameError:
+        try:
+            selected_song = playlistbox.curselection()
+            selected_song = int(selected_song[0])
+            play_it = playlist[selected_song]
+            mixer.music.load(play_it)
+            mixer.music.play()
+            statusbar['text']="playing music" +'-'+os.path.basename(filename_path)
+        except:
+            tkinter.messagebox.showerror('file not found', 'file cannot be found')
+            print('error')
+    else:
+        mixer.music.unpause()
+        statusbar['text'] = "music resume"
+def stop_music():
+    mixer.music.stop()
+    statusbar['text']="music stopped"
+def set_vol(val):
+    volume =int(val)/100
+    mixer.music.set_volume(volume)
+
+def pause_music():
+    global paused
+    paused = TRUE
+    mixer.music.pause()
+    statusbar['text']="music paused"
+middleframe =Frame(root, relief=RAISED, borderwidth=1)
+middleframe.pack()
+
+
+play_photo = PhotoImage(file='play.png')
+play_btn =Button(middleframe, image = play_photo, command=play_music)
+play_btn.pack(side=LEFT)
+pause_photo = PhotoImage(file='pause.png')
+pause_btn =Button(middleframe, image = pause_photo, command=pause_music)
+pause_btn.pack(side=LEFT)
+stop_photo = PhotoImage(file='stop.png')
+stop_btn =Button(middleframe, image = stop_photo, command=stop_music)
+stop_btn.pack(side=LEFT)
+rewind_photo = PhotoImage(file='r11.png')
+rewind_btn =Button(root, image = rewind_photo, command=rewind_music)
+rewind_btn.pack()
+scale = Scale(root, from_=0, to=100, orient=HORIZONTAL, command=set_vol)
+scale.set(70)
+mixer.music.set_volume(0.7)
+scale.pack()
+statusbar = Label(root, text="welcome to drony music", relief=SUNKEN, anchor=W)
+statusbar.pack(side=BOTTOM, fill=X)
+root.mainloop()
